@@ -3,6 +3,8 @@ import mongoose from 'mongoose'
 import dotenv from 'dotenv'
 import cors from 'cors'
 import Route from './routes/routes.js'
+import morgan from 'morgan'
+import fs from 'fs'
 dotenv.config('dotenv')
 
 const ENV = process.env
@@ -23,10 +25,12 @@ mongoose.connect(ENV.DB_URL, {
         console.log('Error in DB connection: ' + err)
     }
 });
+const accessLogStream = fs.WriteStream('./access.log', { flags: 'a' })
 app.use(cors({ origin: '*', credentials: true }))
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(Route)
+app.use(morgan('combined', { stream: accessLogStream }))
 app.listen(ENV.PORT, () => {
     console.log('server online in http://localhost:' + ENV.PORT)
 })
